@@ -1,0 +1,11 @@
+{application, emqx_backend_redis,
+    [{description, "EMQ X Backend with Redis"},
+        {vsn, "git"},
+        {modules, []},
+        {registered, [emqx_backend_redis_sup]},
+        {applications, [kernel,stdlib,eredis,eredis_cluster,ecpool,emqx_passwd]},
+        {mod, {emqx_backend_redis_app, []}},
+        {env, []},
+        {licenses, ["Apache-2.0"]},
+        {maintainers, ["JF.CHEN"]}
+    ]}.
