@@ -44,4 +44,21 @@ on_client_disconnected(ClientInfo, _Reason, _ConnInfo, #{
             {error, not_found}
     end.
 
+on_message_retain(Msg = #message{flags = #{retain := true}}, #{
+    message_retain_cmd := MessageRetainCmd,
+    timeout := Timeout
+}) ->
+    redisFieldValue = lists:concat(["id ", Msg#message.id, " from ", Msg#message.from, " qos ", Msg#message.qos,
+        " topic ", Msg#message.topic, " retain true payload ", Msg#message.payload, " ts ", Msg#message.timestamp]),
+    case emqx_backend_redis_cli:q(MessageRetainCmd, #{topic => Msg#message.topic, string => redisFieldValue}, Timeout) of
+        {ok, _} ->
+            ok;
+        {error, Reason} ->
+            ?LOG(error, "[Redis] Command: ~p failed: ~p", [MessageRetainCmd, Reason]),
+            {error, not_found}
+    end,
+    {ok, Msg};
+
+on_message_retain(Msg, _Env) ->
+    {ok, Msg}.
 

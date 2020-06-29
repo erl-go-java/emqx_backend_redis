@@ -19,6 +19,7 @@
 
 -export([
     connect/1,
+    q/2,
     q/3
 ]).
 
@@ -46,18 +47,25 @@ connect(Opts) ->
 %% Redis Query.
 -spec(q(string(), emqx_types:credentials(), timeout())
         -> {ok, undefined | binary() | list()} | {error, atom() | binary()}).
-q(CmdStr, Credentials, Timeout) ->
-    %% 替换模板查询语句中的对应词 %c->clientId %u->username
-    Cmd = string:tokens(replvar(CmdStr, Credentials), " "),
+q(Cmd, Timeout) ->
     case get_value(type, application:get_env(?APP, server, [])) of
         cluster -> eredis_cluster:q(?APP, Cmd);
         _ -> ecpool:with_client(?APP, fun(C) -> eredis:q(C, Cmd, Timeout) end)
     end.
 
+q(CmdStr, Credentials, Timeout) ->
+    %% 替换模板查询语句中的对应词 %c->clientId %u->username
+    Cmd = string:tokens(replvar(CmdStr, Credentials), " "),
+    q(Cmd, Timeout).
+
 replvar(Cmd, Credentials = #{clientid := ClientId}) ->
     replvar(repl(Cmd, "%c", ClientId), maps:remove(clientid, Credentials));
 replvar(Cmd, Credentials = #{username := Username}) ->
     replvar(repl(Cmd, "%u", Username), maps:remove(username, Credentials));
+replvar(Cmd, Credentials = #{topic := Topic}) ->
+    replvar(repl(Cmd, "%topic", Topic), maps:remove(topic, Credentials));
+replvar(Cmd, Credentials = #{string := String}) ->
+    replvar(repl(Cmd, "%s", String), maps:remove(string, Credentials));
 replvar(Cmd, _) ->
     repl(Cmd, "%t", integer_to_list(erlang:system_time(second))).
 

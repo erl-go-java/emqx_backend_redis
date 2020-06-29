@@ -31,7 +31,8 @@ stop(_State) ->
 
 load() ->
     if_cmd_enabled(client_connected_cmd, fun load_client_connected/1),
-    if_cmd_enabled(client_disconnected_cmd, fun load_client_disconnected/1).
+    if_cmd_enabled(client_disconnected_cmd, fun load_client_disconnected/1),
+    if_cmd_enabled(message_retain_cmd, fun load_message_retain_cmd/1).
 
 load_client_connected(ClientConnectCmd) ->
     {ok, Timeout} = application:get_env(?APP, query_timeout),
@@ -48,6 +49,14 @@ load_client_disconnected(ClientDisconnectedCmd) ->
         timeout => Timeout
     },
     emqx:hook('client.disconnected', fun emqx_backend_redis:on_client_disconnected/4, [Config]).
+
+load_message_retain_cmd(MessageRetainCmd) ->
+    {ok, Timeout} = application:get_env(?APP, query_timeout),
+    Config = #{
+        message_retain_cmd => MessageRetainCmd,
+        timeout => Timeout
+    },
+    emqx:hook('message.publish', fun emqx_backend_redis:on_message_retain/2, [Config]).
 
 unload() ->
     emqx:unhook('client.connected',    fun emqx_backend_redis:on_client_connected/3),
