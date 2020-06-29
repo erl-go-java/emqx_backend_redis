@@ -8,4 +8,4 @@
 %%%-------------------------------------------------------------------
 -author("jiefeng.chen").
 
--define(APP, emqx_auth_redis).
+-define(APP, emqx_backend_redis).

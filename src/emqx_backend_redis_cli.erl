@@ -59,7 +59,7 @@ replvar(Cmd, Credentials = #{clientid := ClientId}) ->
 replvar(Cmd, Credentials = #{username := Username}) ->
     replvar(repl(Cmd, "%u", Username), maps:remove(username, Credentials));
 replvar(Cmd, _) ->
-    repl(Cmd, "%t", erlang:system_time(second)).
+    repl(Cmd, "%t", integer_to_list(erlang:system_time(second))).
 
 repl(S, _Var, undefined) ->
     S;

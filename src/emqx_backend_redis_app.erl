@@ -20,7 +20,7 @@
 ]).
 
 start(_StartType, _StartArgs) ->
-    {ok, Sup} = emqx_auth_redis_sup:start_link(),
+    {ok, Sup} = emqx_backend_redis_sup:start_link(),
     load(),
     {ok, Sup}.
 
@@ -30,7 +30,8 @@ stop(_State) ->
     eredis_cluster:stop_pool(?APP).
 
 load() ->
-    if_cmd_enabled(client_connected_cmd, fun load_client_connected/1).
+    if_cmd_enabled(client_connected_cmd, fun load_client_connected/1),
+    if_cmd_enabled(client_disconnected_cmd, fun load_client_disconnected/1).
 %%    emqx:hook('client.disconnected', fun emqx_backend_redis:disconnected/3, []),
 %%    emqx:hook('session.created',     fun emqx_backend_redis:created/3, []),
 %%    emqx:hook('session.subscribed',  fun emqx_backend_redis:subscribed/3, []),
@@ -45,6 +46,14 @@ load_client_connected(ClientConnectCmd) ->
         timeout => Timeout
     },
     emqx:hook('client.connected', fun emqx_backend_redis:on_client_connected/3, [Config]).
+
+load_client_disconnected(ClientDisconnectedCmd) ->
+    {ok, Timeout} = application:get_env(?APP, query_timeout),
+    Config = #{
+        client_disconnected_cmd => ClientDisconnectedCmd,
+        timeout => Timeout
+    },
+    emqx:hook('client.disconnected', fun emqx_backend_redis:on_client_disconnected/3, [Config]).
 
 unload() ->
     emqx:unhook('client.connected',    fun emqx_backend_redis:on_client_connected/3),

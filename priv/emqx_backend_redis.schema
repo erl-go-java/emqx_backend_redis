@@ -82,3 +82,13 @@ end}.
   {default, ""},
   {datatype, string}
 ]}.
+
+{mapping, "backend.redis.client_connected_cmd", "emqx_backend_redis.client_connected_cmd", [
+    {default, ""},
+    {datatype, string}
+]}.
+
+{mapping, "backend.redis.client_disconnected_cmd", "emqx_backend_redis.client_disconnected_cmd", [
+    {default, ""},
+    {datatype, string}
+]}.

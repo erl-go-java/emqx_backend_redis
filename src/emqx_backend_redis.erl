@@ -16,7 +16,8 @@
 
 %% API
 -export([
-    on_client_connected/3
+    on_client_connected/3,
+    on_client_disconnected/3
 ]).
 
 on_client_connected(ClientInfo, _ConnInfo, #{
@@ -30,3 +31,17 @@ on_client_connected(ClientInfo, _ConnInfo, #{
             ?LOG(error, "[Redis] Command: ~p failed: ~p", [ClientConnectedCmd, Reason]),
             {error, not_found}
     end.
+
+on_client_disconnected(ClientInfo, _ConnInfo, #{
+    client_disconnected_cmd := ClientDisConnectedCmd,
+    timeout := Timeout
+}) ->
+    case emqx_backend_redis_cli:q(ClientDisConnectedCmd, ClientInfo, Timeout) of
+        {ok, _} ->
+            ok;
+        {error, Reason} ->
+            ?LOG(error, "[Redis] Command: ~p failed: ~p", [ClientDisConnectedCmd, Reason]),
+            {error, not_found}
+    end.
+
+
