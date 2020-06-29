@@ -32,12 +32,6 @@ stop(_State) ->
 load() ->
     if_cmd_enabled(client_connected_cmd, fun load_client_connected/1),
     if_cmd_enabled(client_disconnected_cmd, fun load_client_disconnected/1).
-%%    emqx:hook('client.disconnected', fun emqx_backend_redis:disconnected/3, []),
-%%    emqx:hook('session.created',     fun emqx_backend_redis:created/3, []),
-%%    emqx:hook('session.subscribed',  fun emqx_backend_redis:subscribed/3, []),
-%%    emqx:hook('session.unsubscribed',fun emqx_backend_redis:unsubscribed/3, []),
-%%    emqx:hook('message.publish',     fun emqx_backend_redis:publish/3, []),
-%%    emqx:hook('message.acked',       fun emqx_backend_redis:acked/3, []).
 
 load_client_connected(ClientConnectCmd) ->
     {ok, Timeout} = application:get_env(?APP, query_timeout),
@@ -53,16 +47,11 @@ load_client_disconnected(ClientDisconnectedCmd) ->
         client_disconnected_cmd => ClientDisconnectedCmd,
         timeout => Timeout
     },
-    emqx:hook('client.disconnected', fun emqx_backend_redis:on_client_disconnected/3, [Config]).
+    emqx:hook('client.disconnected', fun emqx_backend_redis:on_client_disconnected/4, [Config]).
 
 unload() ->
     emqx:unhook('client.connected',    fun emqx_backend_redis:on_client_connected/3),
-    emqx:unhook('client.disconnected', fun emqx_backend_redis:disconnected/3),
-    emqx:unhook('session.created',     fun emqx_backend_redis:created/3),
-    emqx:unhook('session.subscribed',  fun emqx_backend_redis:subscribed/3),
-    emqx:unhook('session.unsubscribed',fun emqx_backend_redis:unsubscribed/3),
-    emqx:unhook('message.publish',     fun emqx_backend_redis:publish/3),
-    emqx:unhook('message.acked',       fun emqx_backend_redis:acked/3).
+    emqx:unhook('client.disconnected', fun emqx_backend_redis:on_client_disconnected/4).
 
 if_cmd_enabled(Par, Fun) ->
     case application:get_env(?APP, Par) of

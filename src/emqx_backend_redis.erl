@@ -17,7 +17,7 @@
 %% API
 -export([
     on_client_connected/3,
-    on_client_disconnected/3
+    on_client_disconnected/4
 ]).
 
 on_client_connected(ClientInfo, _ConnInfo, #{
@@ -32,7 +32,7 @@ on_client_connected(ClientInfo, _ConnInfo, #{
             {error, not_found}
     end.
 
-on_client_disconnected(ClientInfo, _ConnInfo, #{
+on_client_disconnected(ClientInfo, _Reason, _ConnInfo, #{
     client_disconnected_cmd := ClientDisConnectedCmd,
     timeout := Timeout
 }) ->
