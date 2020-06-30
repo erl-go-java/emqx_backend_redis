@@ -92,3 +92,8 @@ end}.
     {default, ""},
     {datatype, string}
 ]}.
+
+{mapping, "backend.redis.message_retain_cmd", "emqx_backend_redis.message_retain_cmd", [
+{default, ""},
+{datatype, string}
+]}.
