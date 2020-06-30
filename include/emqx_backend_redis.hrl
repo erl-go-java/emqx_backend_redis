@@ -9,3 +9,22 @@
 -author("jiefeng.chen").
 
 -define(APP, emqx_backend_redis).
+
+-define(HMSET, "hmset").
+
+-record(backend_redis_message, {
+  %% Global unique message ID
+  id :: binary(),
+  %% Message QoS
+  qos = 0,
+  %% Message from
+  from :: atom() | binary(),
+  %% Message flags
+  retain :: #{atom() => boolean()},
+  %% Topic that the message is published to
+  topic :: binary(),
+  %% Message Payload
+  payload :: binary(),
+  %% Timestamp (Unit: millisecond)
+  ts :: integer()
+}).

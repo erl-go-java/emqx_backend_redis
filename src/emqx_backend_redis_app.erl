@@ -60,7 +60,8 @@ load_message_retain_cmd(MessageRetainCmd) ->
 
 unload() ->
     emqx:unhook('client.connected',    fun emqx_backend_redis:on_client_connected/3),
-    emqx:unhook('client.disconnected', fun emqx_backend_redis:on_client_disconnected/4).
+    emqx:unhook('client.disconnected', fun emqx_backend_redis:on_client_disconnected/4),
+    emqx:unhook('message.publish', fun emqx_backend_redis:on_message_retain/2).
 
 if_cmd_enabled(Par, Fun) ->
     case application:get_env(?APP, Par) of

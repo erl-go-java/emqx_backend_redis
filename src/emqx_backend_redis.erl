@@ -17,7 +17,8 @@
 %% API
 -export([
     on_client_connected/3,
-    on_client_disconnected/4
+    on_client_disconnected/4,
+    on_message_retain/2
 ]).
 
 on_client_connected(ClientInfo, _ConnInfo, #{
@@ -48,14 +49,22 @@ on_message_retain(Msg = #message{flags = #{retain := true}}, #{
     message_retain_cmd := MessageRetainCmd,
     timeout := Timeout
 }) ->
-    redisFieldValue = lists:concat(["id ", Msg#message.id, " from ", Msg#message.from, " qos ", Msg#message.qos,
-        " topic ", Msg#message.topic, " retain true payload ", Msg#message.payload, " ts ", Msg#message.timestamp]),
-    case emqx_backend_redis_cli:q(MessageRetainCmd, #{topic => Msg#message.topic, string => redisFieldValue}, Timeout) of
+    BackendRedisMessage = #backend_redis_message{
+        id = Msg#message.id,
+        from = Msg#message.from,
+        qos = Msg#message.qos,
+        topic = Msg#message.topic,
+        retain = true,
+        payload = Msg#message.payload,
+        ts = Msg#message.timestamp
+    },
+    Cmd = [?HMSET, MessageRetainCmd ++ binary_to_list(Msg#message.topic), tl(tuple_to_list(BackendRedisMessage))],
+    io:format("Cmd ~p~n", [Cmd]),
+    case emqx_backend_redis_cli:q(Cmd, Timeout) of
         {ok, _} ->
             ok;
         {error, Reason} ->
-            ?LOG(error, "[Redis] Command: ~p failed: ~p", [MessageRetainCmd, Reason]),
-            {error, not_found}
+            ?LOG(error, "[Redis] Command: ~p failed: ~p", [MessageRetainCmd, Reason])
     end,
     {ok, Msg};
 
