@@ -20,7 +20,9 @@
 -export([
     connect/1,
     q/2,
-    q/3
+    q/3,
+    scan/3,
+    expire/2
 ]).
 
 %%--------------------------------------------------------------------
@@ -57,6 +59,24 @@ q(CmdStr, Credentials, Timeout) ->
     %% 替换模板查询语句中的对应词 %c->clientId %u->username
     Cmd = string:tokens(replvar(CmdStr, Credentials), " "),
     q(Cmd, Timeout).
+
+scan(Cursor, Match, Count) ->
+    case q([?SCAN, Cursor, ?MATCH, Match, ?COUNT, Count]) of
+        {ok, List} ->
+            List;
+        {error, Reason} ->
+            ?LOG(error, "[Redis] scan failed: ~p", [Reason]),
+            []
+    end.
+
+expire(Key, Time) ->
+    case q(["expire", Key, Time]) of
+        {ok, _} ->
+            ok;
+        {error, Reason} ->
+            ?LOG(error, "[Redis] scan failed: ~p", [Reason]),
+            fail
+    end.
 
 replvar(Cmd, Credentials = #{clientid := ClientId}) ->
     replvar(repl(Cmd, "%c", ClientId), maps:remove(clientid, Credentials));

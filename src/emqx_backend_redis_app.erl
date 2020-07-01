@@ -52,9 +52,15 @@ load_client_disconnected(ClientDisconnectedCmd) ->
 
 load_message_retain_cmd(MessageRetainCmd) ->
     {ok, Timeout} = application:get_env(?APP, query_timeout),
+    {ok, MaxRetainedMessages} = application:get_env(?APP, max_retained_messages),
+    {ok, MaxPayloadSize} = application:get_env(?APP, max_payload_size),
+    {ok, ExpiryInterval} = application:get_env(?APP, expiry_interval),
     Config = #{
         message_retain_cmd => MessageRetainCmd,
-        timeout => Timeout
+        timeout => Timeout,
+        max_retained_messages => MaxRetainedMessages,
+        max_payload_size => MaxPayloadSize,
+        expiry_interval => ExpiryInterval
     },
     emqx:hook('message.publish', fun emqx_backend_redis:on_message_retain/2, [Config]).
 

@@ -11,6 +11,11 @@
 -define(APP, emqx_backend_redis).
 
 -define(HMSET, "hmset").
+-define(SCAN, "scan").
+-define(MATCH, "MATCH").
+-define(COUNT, "COUNT").
+-define(RETAIN_KEY, "mqtt:retain:*").
+-define(SCAN_COUNT, 100).
 
 -record(backend_redis_message, {
   %% Global unique message ID

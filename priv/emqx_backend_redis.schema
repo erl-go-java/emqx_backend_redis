@@ -97,3 +97,22 @@ end}.
 {default, ""},
 {datatype, string}
 ]}.
+
+{mapping, "backend.redis.retainer.max_retained_messages", "emqx_backend_redis.max_retained_messages", [
+{default, 0},
+{datatype, integer}
+]}.
+
+%% Maximum payload size of retained message.
+%% {$configurable}
+{mapping, "backend.redis.retainer.max_payload_size", "emqx_retainer.max_payload_size", [
+{default, "1MB"},
+{datatype, bytesize}
+]}.
+
+%% Expiry interval of retained message
+%% {$configurable}
+{mapping, "backend.redis.retainer.expiry_interval", "emqx_retainer.expiry_interval", [
+{default, 0},
+{datatype, [integer, {duration, ms}]}
+]}.
